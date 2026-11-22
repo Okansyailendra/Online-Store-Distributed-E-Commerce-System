@@ -1,0 +1,14 @@
+from backend.common.config import settings
+
+class Server1Config:
+    PRIMARY_HOST = settings.SERVER1_RPC_PRIMARY_HOST
+    PRIMARY_PORT = settings.SERVER1_RPC_PRIMARY_PORT
+    BACKUP_HOST = settings.SERVER1_RPC_BACKUP_HOST
+    BACKUP_PORT = settings.SERVER1_RPC_BACKUP_PORT
+    HEARTBEAT_PORT = settings.SERVER1_RPC_HEARTBEAT_PORT
+
+    HEARTBEAT_INTERVAL = settings.HEARTBEAT_INTERVAL
+    HEARTBEAT_TIMEOUT = settings.HEARTBEAT_TIMEOUT
+    MAX_MISSED_HEARTBEATS = settings.MAX_MISSED_HEARTBEATS
+
+config = Server1Config()

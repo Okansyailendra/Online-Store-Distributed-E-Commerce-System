@@ -1,0 +1,14 @@
+from backend.common.config import settings
+
+class Server2Config:
+    PRIMARY_HOST = settings.SERVER2_RMI_PRIMARY_HOST
+    PRIMARY_PORT = settings.SERVER2_RMI_PRIMARY_PORT
+    BACKUP_HOST = settings.SERVER2_RMI_BACKUP_HOST
+    BACKUP_PORT = settings.SERVER2_RMI_BACKUP_PORT
+    HEARTBEAT_PORT = settings.SERVER2_RMI_HEARTBEAT_PORT
+
+    HEARTBEAT_INTERVAL = settings.HEARTBEAT_INTERVAL
+    HEARTBEAT_TIMEOUT = settings.HEARTBEAT_TIMEOUT
+    MAX_MISSED_HEARTBEATS = settings.MAX_MISSED_HEARTBEATS
+
+config = Server2Config()
