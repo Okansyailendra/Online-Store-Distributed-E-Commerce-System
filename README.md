@@ -127,6 +127,87 @@ flowchart TD
    ```
    Buka peramban di: [**http://localhost:3000**](http://localhost:3000)
 
+   *(Atau alternatif cepat tanpa `npm install`: jalankan `python3 client/app.py`)*
+
+---
+
+### Mode 2: Menjalankan di Multi-Laptop (1 Jaringan Wi-Fi / Hotspot yang Sama)
+
+Skenario ini dirancang khusus untuk demonstrasi tugas besar di kelas/laboratorium kampus menggunakan **3 hingga 5 laptop mahasiswa**:
+
+#### 1. Persiapan Jaringan Wi-Fi & Firewall
+- Pastikan seluruh laptop terhubung ke satu **Access Point Wi-Fi atau Hotspot HP yang sama**.
+- Cek alamat IP LAN masing-masing laptop:
+  - Linux: `ip a` (cari interface `wlan0` atau `wlp2s0`)
+  - Windows: Buka CMD lalu ketik `ipconfig` (cari `IPv4 Address`)
+- Buka port firewall pada setiap laptop:
+  - Linux: `sudo ufw allow 3000,6001:6004/tcp && sudo ufw allow 6101:6104/tcp && sudo ufw allow 6201:6204/tcp`
+  - Windows: Buka *Windows Defender Firewall* -> Izinkan port 3000, 6001–6004, 6101–6104, dan 6201–6204.
+
+#### 2. Contoh Pembagian Peran Node (5 Laptop Mahasiswa)
+
+| Laptop ID | Nama Anggota & IP Contoh | Node Backend / Frontend yang Dijalankan |
+| :---: | :--- | :--- |
+| **Laptop 1** | Okan (`192.168.1.101`) | **Frontend Web Next.js (:3000)** |
+| **Laptop 2** | Aril (`192.168.1.102`) | **Server 1 Primary (:6001)** & **Server 2 Backup (:6102)** |
+| **Laptop 3** | Rafi (`192.168.1.103`) | **Server 1 Backup (:6101)** & **Server 2 Primary (:6002)** |
+| **Laptop 4** | Arfian (`192.168.1.104`) | **Server 3 Primary (:6003)** & **Server 4 Primary (:6004)** |
+| **Laptop 5** | Afriza (`192.168.1.105`) | **Server 3 Backup (:6103)** & **Server 4 Backup (:6104)** |
+
+#### 3. Sesuaikan Konfigurasi File `.env` di Semua Laptop
+Salin file `.env.example` menjadi `.env` di semua laptop, lalu masukkan alamat IP laptop teman Anda yang menjalankan layanan tersebut:
+```ini
+# Ganti dengan IP laptop masing-masing:
+SERVER1_RPC_PRIMARY_HOST=192.168.1.102
+SERVER1_RPC_BACKUP_HOST=192.168.1.103
+
+SERVER2_RMI_PRIMARY_HOST=192.168.1.103
+SERVER2_RMI_BACKUP_HOST=192.168.1.102
+
+SERVER3_API_PRIMARY_HOST=192.168.1.104
+SERVER3_API_BACKUP_HOST=192.168.1.105
+
+SERVER4_DATA_PRIMARY_HOST=192.168.1.104
+SERVER4_DATA_BACKUP_HOST=192.168.1.105
+```
+
+#### 4. Menjalankan Node di Laptop Masing-Masing
+- **Di Laptop 2 (Server 1 Primary & Server 2 Backup):**
+  ```bash
+  python3 backend/server1_rpc/server.py --role COORDINATOR
+  python3 backend/server2_rmi/server.py --role FOLLOWER
+  ```
+- **Di Laptop 3 (Server 1 Backup & Server 2 Primary):**
+  ```bash
+  python3 backend/server1_rpc/server.py --role FOLLOWER
+  python3 backend/server2_rmi/server.py --role COORDINATOR
+  ```
+- **Di Laptop 4 (Server 3 Primary & Server 4 Primary):**
+  ```bash
+  python3 backend/server4_data/server.py --role COORDINATOR
+  python3 backend/server3_api/server.py --role COORDINATOR
+  ```
+- **Di Laptop 5 (Server 3 Backup & Server 4 Backup):**
+  ```bash
+  python3 backend/server4_data/server.py --role FOLLOWER
+  python3 backend/server3_api/server.py --role FOLLOWER
+  ```
+- **Di Laptop 1 (Frontend):**
+  ```bash
+  cd frontend && npm run dev
+  ```
+  Buka browser di Laptop 1: `http://localhost:3000` (atau anggota lain bisa buka dari browser laptop mereka di `http://192.168.1.101:3000`).
+
+---
+
+### Demonstrasi Failover Lintas Laptop (Live Demo Dosen)
+1. Mahasiswa di Laptop 1 membuka toko online di browser.
+2. Saat proses demo berlangsung, **matikan Wi-Fi atau tekan `Ctrl + C` di Laptop 2 (Server 1 Primary)**.
+3. Amati layar **Laptop 3 (Server 1 Backup)**: dalam 5 detik muncul log promosi `[PROMOTED TO COORDINATOR]`.
+4. Di **Laptop 1**, pembeli menekan tombol beli lagi. Transaksi tetap sukses 100% karena diarahkan ke Laptop 3!
+
+---
+
 ---
 
 ### Akun Demo Bawaan (Sudah Terisi di Database)
